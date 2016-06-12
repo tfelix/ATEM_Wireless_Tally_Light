@@ -19,47 +19,47 @@ int B_PIN = 6;
 const byte ID = 0x92;
 
 // HTML for the setup page
-PROGMEM prog_char html0[] = "";
-PROGMEM prog_char html1[] = "<html><title>ATEM Tally Transmitter Setup</title></html>";
-PROGMEM prog_char html2[] = "<table bgcolor=\"#999999\" border";
-PROGMEM prog_char html3[] = "=\"0\" width=\"100%\" cellpadding=\"1\" style=\"font-family:Verdana;color:#fff";
-PROGMEM prog_char html4[] = "fff;font-size:12px;\"><tr><td>&nbsp ATEM Tally Transmitter Setup</td></tr></table><br>";
+const PROGMEM char html0[] = "";
+const PROGMEM char html1[] = "<html><title>ATEM Tally Transmitter Setup</title></html>";
+const PROGMEM char html2[] = "<table bgcolor=\"#999999\" border";
+const PROGMEM char html3[] = "=\"0\" width=\"100%\" cellpadding=\"1\" style=\"font-family:Verdana;color:#fff";
+const PROGMEM char html4[] = "fff;font-size:12px;\"><tr><td>&nbsp ATEM Tally Transmitter Setup</td></tr></table><br>";
 
-PROGMEM prog_char html5[] = "<script>function hex2num (s_hex) {eval(\"var n_num=0X\" + s_hex);return n_num;}";
-PROGMEM prog_char html6[] = "</script><table><form><input type=\"hidden\" name=\"SBM\" value=\"1\"><tr><td>MAC:</td>";
-PROGMEM prog_char html7[] = "<td><input id=\"T1\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT1\" value=\"";
-PROGMEM prog_char html8[] = "\">.<input id=\"T3\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT2\" value=\"";
-PROGMEM prog_char html9[] = "\">.<input id=\"T5\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT3\" value=\"";
-PROGMEM prog_char html10[] = "\">.<input id=\"T7\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT4\" value=\"";
-PROGMEM prog_char html11[] = "\">.<input id=\"T9\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT5\" value=\"";
-PROGMEM prog_char html12[] = "\">.<input id=\"T11\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT6\" value=\"";
+const PROGMEM char html5[] = "<script>function hex2num (s_hex) {eval(\"var n_num=0X\" + s_hex);return n_num;}";
+const PROGMEM char html6[] = "</script><table><form><input type=\"hidden\" name=\"SBM\" value=\"1\"><tr><td>MAC:</td>";
+const PROGMEM char html7[] = "<td><input id=\"T1\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT1\" value=\"";
+const PROGMEM char html8[] = "\">.<input id=\"T3\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT2\" value=\"";
+const PROGMEM char html9[] = "\">.<input id=\"T5\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT3\" value=\"";
+const PROGMEM char html10[] = "\">.<input id=\"T7\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT4\" value=\"";
+const PROGMEM char html11[] = "\">.<input id=\"T9\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT5\" value=\"";
+const PROGMEM char html12[] = "\">.<input id=\"T11\" type=\"text\" size=\"2\" maxlength=\"2\" name=\"DT6\" value=\"";
 
-PROGMEM prog_char html13[] = "\"><input id=\"T2\" type=\"hidden\" name=\"DT1\"><input id=\"T4\" type=\"hidden\" name=\"DT2";
-PROGMEM prog_char html14[] = "\"><input id=\"T6\" type=\"hidden\" name=\"DT3\"><input id=\"T8\" type=\"hidden\" name=\"DT4";
-PROGMEM prog_char html15[] = "\"><input id=\"T10\" type=\"hidden\" name=\"DT5\"><input id=\"T12\" type=\"hidden\" name=\"D";
-PROGMEM prog_char html16[] = "T6\"></td></tr><tr><td>IP:</td><td><input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT7\" value=\"";
-PROGMEM prog_char html17[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT8\" value=\"";
-PROGMEM prog_char html18[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT9\" value=\"";
-PROGMEM prog_char html19[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT10\" value=\"";
+const PROGMEM char html13[] = "\"><input id=\"T2\" type=\"hidden\" name=\"DT1\"><input id=\"T4\" type=\"hidden\" name=\"DT2";
+const PROGMEM char html14[] = "\"><input id=\"T6\" type=\"hidden\" name=\"DT3\"><input id=\"T8\" type=\"hidden\" name=\"DT4";
+const PROGMEM char html15[] = "\"><input id=\"T10\" type=\"hidden\" name=\"DT5\"><input id=\"T12\" type=\"hidden\" name=\"D";
+const PROGMEM char html16[] = "T6\"></td></tr><tr><td>IP:</td><td><input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT7\" value=\"";
+const PROGMEM char html17[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT8\" value=\"";
+const PROGMEM char html18[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT9\" value=\"";
+const PROGMEM char html19[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT10\" value=\"";
 
-PROGMEM prog_char html20[] = "\"></td></tr><tr><td>ATEM SWITCHER:</td><td><input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT11\" value=\"";
-PROGMEM prog_char html21[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT12\" value=\"";
-PROGMEM prog_char html22[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT13\" value=\"";
-PROGMEM prog_char html23[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT14\" value=\"";
-PROGMEM prog_char html24[] = "\"> PORT<input type=\"text\" size=\"6\" maxlength=\"6\" name=\"DT15\" value=\"";
-PROGMEM prog_char html25[] = "\"></td></tr><tr><td><br></td></tr><tr><td><input id=\"button1\"type=\"submit\" name=\"submit\" value=\"SUBMIT\" ";
+const PROGMEM char html20[] = "\"></td></tr><tr><td>ATEM SWITCHER:</td><td><input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT11\" value=\"";
+const PROGMEM char html21[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT12\" value=\"";
+const PROGMEM char html22[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT13\" value=\"";
+const PROGMEM char html23[] = "\">.<input type=\"text\" size=\"3\" maxlength=\"3\" name=\"DT14\" value=\"";
+const PROGMEM char html24[] = "\"> PORT<input type=\"text\" size=\"6\" maxlength=\"6\" name=\"DT15\" value=\"";
+const PROGMEM char html25[] = "\"></td></tr><tr><td><br></td></tr><tr><td><input id=\"button1\"type=\"submit\" name=\"submit\" value=\"SUBMIT\" ";
 
-PROGMEM prog_char html26[] = "Onclick=\"document.getElementById('T2').value ";
-PROGMEM prog_char html27[] = "= hex2num(document.getElementById('T1').value);";
-PROGMEM prog_char html28[] = "document.getElementById('T4').value = hex2num(document.getElementById('T3').value);";
-PROGMEM prog_char html29[] = "document.getElementById('T6').value = hex2num(document.getElementById('T5').value);";
-PROGMEM prog_char html30[] = "document.getElementById('T8').value = hex2num(document.getElementById('T7').value);";
-PROGMEM prog_char html31[] = "document.getElementById('T10').value = hex2num(document.getElementById('T9').value);";
-PROGMEM prog_char html32[] = "document.getElementById('T12').value = hex2num(document.getElementById('T11').value);\"";
-PROGMEM prog_char html33[] = "></td></tr></form></table>";
-PROGMEM prog_char html34[] = "<br>Restarting...";
+const PROGMEM char html26[] = "Onclick=\"document.getElementById('T2').value ";
+const PROGMEM char html27[] = "= hex2num(document.getElementById('T1').value);";
+const PROGMEM char html28[] = "document.getElementById('T4').value = hex2num(document.getElementById('T3').value);";
+const PROGMEM char html29[] = "document.getElementById('T6').value = hex2num(document.getElementById('T5').value);";
+const PROGMEM char html30[] = "document.getElementById('T8').value = hex2num(document.getElementById('T7').value);";
+const PROGMEM char html31[] = "document.getElementById('T10').value = hex2num(document.getElementById('T9').value);";
+const PROGMEM char html32[] = "document.getElementById('T12').value = hex2num(document.getElementById('T11').value);\"";
+const PROGMEM char html33[] = "></td></tr></form></table>";
+const PROGMEM char html34[] = "<br>Restarting...";
 
-PGM_P html[] PROGMEM = { html0, html1, html2, html3, html4, html5, html6, html7, html8, html9, html10, html11, html12,
+PGM_P const html[] PROGMEM = { html0, html1, html2, html3, html4, html5, html6, html7, html8, html9, html10, html11, html12,
 	html13, html14, html15, html16, html17, html18, html19, html20, html21, html22, html23, html24, html25, html26, html27, 
 	html28, html29, html30, html31, html32, html33, html34 };
 
@@ -164,7 +164,7 @@ void ATEMTally::change_LED_state(int state) {
 	Helps with printing buffer
 */
 
-void ATEMTally::print_buffer(EthernetClient& client, const prog_char** s, int i, bool number, bool hex) {
+void ATEMTally::print_buffer(EthernetClient& client, const char* const* s, int i, bool number, bool hex) {
 	int total = 0;
 	int start = 0;
 	char buffer[100];
