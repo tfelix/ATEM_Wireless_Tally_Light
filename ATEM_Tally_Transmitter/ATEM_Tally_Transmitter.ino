@@ -1,3 +1,4 @@
+#include <RF24.h>
 #include <SPI.h>
 #include <Ethernet.h>
 #include <TextFinder.h>
@@ -5,7 +6,19 @@
 #include <avr/pgmspace.h>
 #include <ATEMstd.h>
 #include <ATEMTally.h>
-#include <JeeLibMod.h>
+
+
+
+/********** RADIO SETUP ************/
+const bool radioNumber = 0;
+
+const int RADIO_CHIP_ENABLED_PIN = 7;
+const int RADIO_CHIP_SELECT_PIN = 8;
+
+RF24 radio(RADIO_CHIP_ENABLED_PIN, RADIO_CHIP_SELECT_PIN);
+
+const uint8_t address[] = { 0x10,0x10,0x10 };
+/***********************************/
 
 // set the default MAC address
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
@@ -17,7 +30,7 @@ byte ip[] = {192,168,1,234};
 byte switcher_ip[] = {192,168,1,240};
 
 // set the default PORT of the ATEM switcher
-long switcher_port = 49910;
+int switcher_port = 49910;
 
 // initialize the ethernet server (for settings page)
 EthernetServer server(80);
@@ -33,6 +46,8 @@ ATEMTally ATEMTally;
 boolean programOn;
 boolean previewOn;
 
+boolean hasNewData = true;
+
 // define a structure for sending over the radio
 struct {
 	int program_1;
@@ -43,7 +58,23 @@ struct {
 void setup()
 {
 	// initialize the RF12 radio; set the Node # to 20
-	RF12Mod_initialize(20, RF12Mod_433MHZ, 4);
+	radio.begin();
+
+  // 3 bytes are enough.
+  radio.setAddressWidth(3);
+
+  // Set the PA Level low to prevent power supply related issues since this is a
+  // getting_started sketch, and the likelihood of close proximity of the devices. RF24_PA_MAX is default.
+  radio.setPALevel(RF24_PA_LOW);
+
+  // We do multicast. Disable ACK this could lead to problems (usually on the receiving side)
+  // but just to be shure.
+  radio.setAutoAck(false);
+
+  // Slowest rate, totally okay for us. Most secure against interference.
+  radio.setDataRate(RF24_250KBPS);
+
+  radio.openWritingPipe(address);
 
 	// initialize the ATEMTally object
 	ATEMTally.initialize();
@@ -110,9 +141,9 @@ void loop()
 		}
 		
 		// when radio is available, transmit the structure with program and preview numbers
-		RF12Mod_recvDone();
-		if (RF12Mod_canSend()) {
-			RF12Mod_sendStart(0, &payload, sizeof payload);
+		if (hasNewData) {
+      radio.stopListening();
+			radio.write(&payload, sizeof(payload));
 			ATEMTally.change_LED_state(3);
 		}
 	}
