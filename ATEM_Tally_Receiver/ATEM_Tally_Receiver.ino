@@ -1,25 +1,28 @@
-#include <JeeLib.h>
+#include <RF24.h>
+
+#include "ATEMData.h"
+
 
 // PROGRAM LED pin
-int PROGRAM_PIN = A0;
+const int PROGRAM_PIN = A0;
 
 // PREVIEW LED pin
-int PREVIEW_PIN = A1;
+const int PREVIEW_PIN = A1;
 
 // POWER LED pin (blinks the node # on power up)
-int POWER_PIN = A2;
+const int POWER_PIN = A2;
 
 // Node # DIP switch 1 pin
-int DIP1_PIN = 4;
+const int DIP1_PIN = 4;
 
 // Node # DIP switch 2 pin
-int DIP2_PIN = 5;
+const int DIP2_PIN = 5;
 
 // Node # DIP switch 3 pin
-int DIP3_PIN = 6;
+const int DIP3_PIN = 6;
 
 // Node # DIP switch 4 pin
-int DIP4_PIN = 7;
+const int DIP4_PIN = 7;
 
 // last received radio signal time (to power off LEDs when no signal)
 unsigned long last_radio_recv = 0;
@@ -27,14 +30,24 @@ unsigned long last_radio_recv = 0;
 // default Node # 200 (alias to 0) will blink constantly if signal exists
 int this_node = 200;
 
-// The current program 1 camera number
-int program_1;
+// Holding the received data.
+Payload payload;
 
-// The current program 2 camera number
-int program_2;
+// Holding currently displayed program.
+Payload currentPayload;
 
-// The current preview number.
-int preview;
+
+
+/********** RADIO SETUP ************/
+const bool radioNumber = 0;
+
+const int RADIO_CHIP_ENABLED_PIN = 7;
+const int RADIO_CHIP_SELECT_PIN = 8;
+
+RF24 radio(RADIO_CHIP_ENABLED_PIN, RADIO_CHIP_SELECT_PIN);
+
+const uint8_t address[] = { 0x10,0x10,0x10 };
+/***********************************/
 
 void setup() {
 	// initialize all the defined pins
@@ -56,6 +69,27 @@ void setup() {
   
 	// set the Node # according to the DIP pins
   setNodeID(dipPins, 4);
+
+  // initialize the radio
+  radio.begin();
+
+  // 3 bytes are enough.
+  radio.setAddressWidth(3);
+
+  // Set the PA Level low to prevent power supply related issues since this is a
+  // getting_started sketch, and the likelihood of close proximity of the devices. RF24_PA_MAX is default.
+  radio.setPALevel(RF24_PA_LOW);
+
+  // We do multicast. Disable ACK this could lead to problems (usually on the receiving side)
+  // but just to be shure.
+  radio.setAutoAck(false);
+
+  // Slowest rate, totally okay for us. Most secure against interference.
+  radio.setDataRate(RF24_250KBPS);
+
+  radio.openReadingPipe(0, address);
+
+  radio.startListening();
   
 	if (this_node == 200) {
 		// if the Node # is 0 (alias to 200), blink quickly (30 times) on power on
@@ -80,42 +114,47 @@ void setup() {
 }
 
 void loop() {
-	if (rf12_recvDone() && rf12_crc == 0 && rf12_len >= 1) {
-		// a radio signal was received
-		
-		// get the program and preview numbers
-		program_1 = rf12_data[0];
-		program_2 = rf12_data[2];
-    preview = rf12_data[4];
 
-		// turn off all LEDs
-		digitalWrite(PREVIEW_PIN, 1023);
-		digitalWrite(PROGRAM_PIN, 1023);
-		digitalWrite(POWER_PIN, 1023);
+  if(radio.available()) {
+    radio.read(&payload, sizeof(payload) );
 
-		if (this_node == 200) {
-			// if the Node # is 200 (which is also 0), blink POWER LED every 1 second if signal exists
-			digitalWrite(POWER_PIN, 0);
-			delay(1000);
-			digitalWrite(POWER_PIN, 1023);
-			delay(1000);
-		} else {
-			// if the Node # is a set number, trigger an LED accordingly
-			if (program_1 == this_node || program_2 == this_node) {
-				digitalWrite(PREVIEW_PIN, 1023);
-				analogWrite(PROGRAM_PIN, 0);
-			} else if (preview == this_node) {
-				analogWrite(PROGRAM_PIN, 1023);
-				digitalWrite(PREVIEW_PIN, 0);
-			}
-		}
-		
-		// keep track of last radio signal time
-		last_radio_recv = millis();
-	}
+    // Receiving of a new packed was done.
+    // Check if it contains new data.
+    if(isPayloadEqual(payload, currentPayload)) {
+      return;
+    }
+    
+    // get the program and preview numbers
+    currentPayload = payload;
+
+    // keep track of last radio signal time
+    last_radio_recv = millis();
+
+    // turn off all LEDs
+    digitalWrite(PREVIEW_PIN, 1023);
+    digitalWrite(PROGRAM_PIN, 1023);
+    digitalWrite(POWER_PIN, 1023);
+
+    if (this_node == 200) {
+      // if the Node # is 200 (which is also 0), blink POWER LED every 1 second if signal exists
+      digitalWrite(POWER_PIN, 0);
+      delay(1000);
+      digitalWrite(POWER_PIN, 1023);
+      delay(1000);
+    } else {
+      // if the Node # is a set number, trigger an LED accordingly
+      if (currentPayload.program_1 == this_node || currentPayload.program_2 == this_node) {
+        digitalWrite(PREVIEW_PIN, 1023);
+        analogWrite(PROGRAM_PIN, 0);
+      } else if (currentPayload.preview == this_node) {
+        analogWrite(PROGRAM_PIN, 1023);
+        digitalWrite(PREVIEW_PIN, 0);
+      }
+    }
+  }
   
-	// turn off LEDs when no radio signal exists (the past 1 second)
-	if (millis() - last_radio_recv > 1000) {
+	// turn off LEDs when no radio signal exists (the past 5,5 second)
+	if (millis() - last_radio_recv > 5500) {
 		digitalWrite(PREVIEW_PIN, 1023);
 		digitalWrite(PROGRAM_PIN, 1023);
 		digitalWrite(POWER_PIN, 1023);
@@ -123,7 +162,7 @@ void loop() {
 }
 
 // reads the DIP switches and determines the Node #
-byte setNodeID(int* dipPins, int numPins) {
+void setNodeID(int* dipPins, int numPins) {
 	float j=0;
   
 	for(int i=0; i < numPins; i++) {
@@ -136,7 +175,4 @@ byte setNodeID(int* dipPins, int numPins) {
 
 	// if the DIP switches are all OFF, assign 200 (alias to 0) to the Node #
   this_node = this_node == 0 ? 200 : this_node;
-
-	// initialize the radio
-  rf12_initialize(this_node, RF12_433MHZ, 4);
 }

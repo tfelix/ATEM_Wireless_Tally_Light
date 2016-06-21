@@ -7,6 +7,8 @@
 #include <ATEMstd.h>
 #include <ATEMTally.h>
 
+#include "ATEMData.h"
+
 
 
 /********** RADIO SETUP ************/
@@ -46,14 +48,11 @@ ATEMTally ATEMTally;
 boolean programOn;
 boolean previewOn;
 
-boolean hasNewData = true;
+Payload payload;
+Payload oldPayload;
 
-// define a structure for sending over the radio
-struct {
-	int program_1;
-	int program_2;
-	int preview;
-} payload;
+// Timestamp of last radio tx.
+unsigned long lastRadioTx = 0;
 
 void setup()
 {
@@ -87,6 +86,13 @@ void setup()
 	
 	// start the server
 	server.begin();
+
+ // Init the structs.
+ memset(&payload, 0, sizeof payload);
+ memset(&oldPayload, 0, sizeof oldPayload);
+
+  // set this variable to current time
+  lastRadioTx = millis();
 
 	// delay a bit before looping
 	delay(1000);
@@ -127,6 +133,8 @@ void loop()
 			programOn = AtemSwitcher.getProgramTally(i);
 			previewOn = AtemSwitcher.getPreviewTally(i);
 
+      // There are two program channels which can be on. So we must
+      // check both.
 			if (programOn) {
 				if (payload.program_1 == 0) {
 					payload.program_1 = i;
@@ -134,25 +142,28 @@ void loop()
 					payload.program_2 = i;
 				}
 			}
-
+     
 			if (previewOn) {
 				payload.preview = i;
 			}
 		}
 		
-		// when radio is available, transmit the structure with program and preview numbers
-		if (hasNewData) {
+		// when radio is available and new data here transmit or at least transmit
+    // every 5 seconds.
+		if (!isPayloadEqual(payload, oldPayload) || millis() - lastRadioTx > 5000) {
       radio.stopListening();
 			radio.write(&payload, sizeof(payload));
-			ATEMTally.change_LED_state(3);
+			oldPayload = payload;
+			//ATEMTally.change_LED_state(3);
 		}
 	}
 
 	// a delay is needed due to some weird issue
 	delay(10);
 
-	ATEMTally.change_LED_state(1);
+	//ATEMTally.change_LED_state(1);
 
 	// monitors for the reset button press
 	ATEMTally.monitor_reset();
 }
+
