@@ -1,31 +1,21 @@
 #include <RF24.h>
-
 #include "ATEMData.h"
-
-#define ON 0
-#define OFF 1023
-
 
 // PROGRAM LED pin
 const int PROGRAM_PIN = A0;
-
 // PREVIEW LED pin
-const int PREVIEW_PIN = A1;
-
-// POWER LED pin (blinks the node # on power up)
-const int POWER_PIN = A2;
+const int PREVIEW_PIN = A2;
+// POWER LED pin
+const int POWER_PIN = A1;
 
 // Node # DIP switch 1 pin
-const int DIP1_PIN = 4;
-
+const int DIP1_PIN = 3;
 // Node # DIP switch 2 pin
-const int DIP2_PIN = 5;
-
+const int DIP2_PIN = 4;
 // Node # DIP switch 3 pin
-const int DIP3_PIN = 6;
-
+const int DIP3_PIN = 5;
 // Node # DIP switch 4 pin
-const int DIP4_PIN = 7;
+const int DIP4_PIN = 6;
 
 // last received radio signal time (to power off LEDs when no signal)
 unsigned long last_radio_recv = 0;
@@ -44,8 +34,8 @@ Payload currentPayload;
 /********** RADIO SETUP ************/
 const bool radioNumber = 0;
 
-const int RADIO_CHIP_ENABLED_PIN = 7;
-const int RADIO_CHIP_SELECT_PIN = 8;
+const int RADIO_CHIP_ENABLED_PIN = 9;
+const int RADIO_CHIP_SELECT_PIN = 10;
 
 RF24 radio(RADIO_CHIP_ENABLED_PIN, RADIO_CHIP_SELECT_PIN);
 
@@ -57,21 +47,18 @@ void setup() {
 	pinMode(PROGRAM_PIN, OUTPUT);
 	pinMode(PREVIEW_PIN, OUTPUT);
 	pinMode(POWER_PIN, OUTPUT);
-	pinMode(DIP1_PIN, INPUT);
-	pinMode(DIP2_PIN, INPUT);
-	pinMode(DIP3_PIN, INPUT);
-	pinMode(DIP4_PIN, INPUT);
+	pinMode(DIP1_PIN, INPUT_PULLUP);
+  pinMode(DIP2_PIN, INPUT_PULLUP);
+  pinMode(DIP3_PIN, INPUT_PULLUP);
+  pinMode(DIP4_PIN, INPUT_PULLUP);
 
 	// turn all LEDs off
-  analogWrite(PROGRAM_PIN, OFF);
-  analogWrite(PREVIEW_PIN, OFF);
-  analogWrite(POWER_PIN, OFF);  
-  
-	// create an array of DIP pins
-  int dipPins[] = {DIP1_PIN, DIP2_PIN, DIP3_PIN, DIP4_PIN};
+  digitalWrite(PROGRAM_PIN, LOW);
+  digitalWrite(PREVIEW_PIN, LOW);
+  digitalWrite(POWER_PIN, LOW); 
   
 	// set the Node # according to the DIP pins
-  setNodeID(dipPins, 4);
+  setNodeID();
 
   // initialize the radio
   radio.begin();
@@ -97,17 +84,17 @@ void setup() {
 	if (this_node == 200) {
 		// if the Node # is 0 (alias to 200), blink quickly (30 times) on power on
 		for (int i=0; i < 30; i++) {
-			analogWrite(POWER_PIN, ON);
+			digitalWrite(POWER_PIN, HIGH);
 			delay(20);
-			analogWrite(POWER_PIN, OFF);
+			digitalWrite(POWER_PIN, LOW);
 			delay(20);
 		}
 	} else {
 		// if the Node # is a set number, blink the Node # on power on
 		for (int i=0; i < this_node; i++) {
-			analogWrite(POWER_PIN, ON);
+			digitalWrite(POWER_PIN, HIGH);
 			delay(300);
-			analogWrite(POWER_PIN, OFF);
+			digitalWrite(POWER_PIN, LOW);
 			delay(300);
 		}
 	}
@@ -134,48 +121,54 @@ void loop() {
     last_radio_recv = millis();
 
     // turn off all LEDs
-    digitalWrite(PREVIEW_PIN, OFF);
-    digitalWrite(PROGRAM_PIN, OFF);
-    digitalWrite(POWER_PIN, OFF);
+    digitalWrite(PREVIEW_PIN, LOW);
+    digitalWrite(PROGRAM_PIN, LOW);
+    digitalWrite(POWER_PIN, LOW);
 
     if (this_node == 200) {
       // if the Node # is 200 (which is also 0), blink POWER LED every 1 second if signal exists
-      digitalWrite(POWER_PIN, ON);
+      digitalWrite(POWER_PIN, HIGH);
       delay(1000);
-      digitalWrite(POWER_PIN, OFF);
+      digitalWrite(POWER_PIN, LOW);
       delay(1000);
     } else {
       // if the Node # is a set number, trigger an LED accordingly
       if (currentPayload.program_1 == this_node || currentPayload.program_2 == this_node) {
-        digitalWrite(PREVIEW_PIN, OFF);
-        analogWrite(PROGRAM_PIN, ON);
+        digitalWrite(PREVIEW_PIN, LOW);
+        digitalWrite(PROGRAM_PIN, HIGH);
       } else if (currentPayload.preview == this_node) {
-        analogWrite(PROGRAM_PIN, OFF);
-        digitalWrite(PREVIEW_PIN, ON);
+        digitalWrite(PROGRAM_PIN, LOW);
+        digitalWrite(PREVIEW_PIN, HIGH);
       }
     }
   }
   
 	// turn off LEDs when no radio signal exists (the past 5,5 second)
-	if (millis() - last_radio_recv > 5500) {
-		digitalWrite(PREVIEW_PIN, OFF);
-		digitalWrite(PROGRAM_PIN, OFF);
-		digitalWrite(POWER_PIN, OFF);
-	}
+  if (millis() - last_radio_recv > 5500) {
+    digitalWrite(PREVIEW_PIN, 0);
+    digitalWrite(PROGRAM_PIN, 0);
+    digitalWrite(POWER_PIN, 0);
+  }
 }
 
 // reads the DIP switches and determines the Node #
-void setNodeID(int* dipPins, int numPins) {
-	float j=0;
+void setNodeID() {
+
+  // create an array of DIP pins
+  const short numPins = 4;
+  const int dipPins[] = {DIP1_PIN, DIP2_PIN, DIP3_PIN, DIP4_PIN};
   
-	for(int i=0; i < numPins; i++) {
-		if (digitalRead(dipPins[i])) {
-			j += pow(2, i);
-		}
-	}
+  float j=0;
+  
+  for(int i=0; i < numPins; i++) {
+    // Invert because of pullup resistor.
+    if (!digitalRead(dipPins[i])) {
+      j += pow(2, i);
+    }
+  }
 
   this_node = (int)(j + 0.5);
 
-	// if the DIP switches are all OFF, assign 200 (alias to 0) to the Node #
+  // if the DIP switches are all OFF, assign 200 (alias to 0) to the Node #
   this_node = this_node == 0 ? 200 : this_node;
 }
