@@ -2,6 +2,9 @@
 
 #include "ATEMData.h"
 
+#define ON 0
+#define OFF 1023
+
 
 // PROGRAM LED pin
 const int PROGRAM_PIN = A0;
@@ -59,10 +62,10 @@ void setup() {
 	pinMode(DIP3_PIN, INPUT);
 	pinMode(DIP4_PIN, INPUT);
 
-	// turn all LEDs off (1023 is off)
-  analogWrite(PROGRAM_PIN, 1023);
-  analogWrite(PREVIEW_PIN, 1023);
-  analogWrite(POWER_PIN, 1023);  
+	// turn all LEDs off
+  analogWrite(PROGRAM_PIN, OFF);
+  analogWrite(PREVIEW_PIN, OFF);
+  analogWrite(POWER_PIN, OFF);  
   
 	// create an array of DIP pins
   int dipPins[] = {DIP1_PIN, DIP2_PIN, DIP3_PIN, DIP4_PIN};
@@ -94,17 +97,17 @@ void setup() {
 	if (this_node == 200) {
 		// if the Node # is 0 (alias to 200), blink quickly (30 times) on power on
 		for (int i=0; i < 30; i++) {
-			analogWrite(POWER_PIN, 0);
+			analogWrite(POWER_PIN, ON);
 			delay(20);
-			analogWrite(POWER_PIN, 1023);
+			analogWrite(POWER_PIN, OFF);
 			delay(20);
 		}
 	} else {
 		// if the Node # is a set number, blink the Node # on power on
 		for (int i=0; i < this_node; i++) {
-			analogWrite(POWER_PIN, 0);
+			analogWrite(POWER_PIN, ON);
 			delay(300);
-			analogWrite(POWER_PIN, 1023);
+			analogWrite(POWER_PIN, OFF);
 			delay(300);
 		}
 	}
@@ -131,33 +134,33 @@ void loop() {
     last_radio_recv = millis();
 
     // turn off all LEDs
-    digitalWrite(PREVIEW_PIN, 1023);
-    digitalWrite(PROGRAM_PIN, 1023);
-    digitalWrite(POWER_PIN, 1023);
+    digitalWrite(PREVIEW_PIN, OFF);
+    digitalWrite(PROGRAM_PIN, OFF);
+    digitalWrite(POWER_PIN, OFF);
 
     if (this_node == 200) {
       // if the Node # is 200 (which is also 0), blink POWER LED every 1 second if signal exists
-      digitalWrite(POWER_PIN, 0);
+      digitalWrite(POWER_PIN, ON);
       delay(1000);
-      digitalWrite(POWER_PIN, 1023);
+      digitalWrite(POWER_PIN, OFF);
       delay(1000);
     } else {
       // if the Node # is a set number, trigger an LED accordingly
       if (currentPayload.program_1 == this_node || currentPayload.program_2 == this_node) {
-        digitalWrite(PREVIEW_PIN, 1023);
-        analogWrite(PROGRAM_PIN, 0);
+        digitalWrite(PREVIEW_PIN, OFF);
+        analogWrite(PROGRAM_PIN, ON);
       } else if (currentPayload.preview == this_node) {
-        analogWrite(PROGRAM_PIN, 1023);
-        digitalWrite(PREVIEW_PIN, 0);
+        analogWrite(PROGRAM_PIN, OFF);
+        digitalWrite(PREVIEW_PIN, ON);
       }
     }
   }
   
 	// turn off LEDs when no radio signal exists (the past 5,5 second)
 	if (millis() - last_radio_recv > 5500) {
-		digitalWrite(PREVIEW_PIN, 1023);
-		digitalWrite(PROGRAM_PIN, 1023);
-		digitalWrite(POWER_PIN, 1023);
+		digitalWrite(PREVIEW_PIN, OFF);
+		digitalWrite(PROGRAM_PIN, OFF);
+		digitalWrite(POWER_PIN, OFF);
 	}
 }
 

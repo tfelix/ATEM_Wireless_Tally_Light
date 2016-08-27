@@ -7,7 +7,7 @@ typedef struct {
 } Payload;
 
 boolean isPayloadEqual(Payload &p1, Payload &p2) {
-  return p1.program_1 == p2.program_2 
+  return p1.program_1 == p2.program_1 
     && p1.program_2 == p2.program_2 
     && p1.preview == p2.preview;
 }
