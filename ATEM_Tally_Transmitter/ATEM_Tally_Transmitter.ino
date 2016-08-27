@@ -26,10 +26,10 @@ const uint8_t address[] = { 0x10,0x10,0x10 };
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
 
 // set the default IP address
-byte ip[] = {192,168,1,234};
+byte ip[] = {192,168,178,239};
 
 // set the default IP address of the ATEM switcher
-byte switcher_ip[] = {192,168,1,240};
+byte switcher_ip[] = {192,168,178,240};
 
 // set the default PORT of the ATEM switcher
 int switcher_port = 49910;
