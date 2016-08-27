@@ -136,26 +136,20 @@ void loop()
 
 		// when radio is available and new data here transmit or at least transmit
     // every 5 seconds.
-		if (!isPayloadEqual(payload, oldPayload) || (millis() - lastRadioTx > 5000)) {
+		if (!isPayloadEqual(payload, oldPayload) || (millis() - lastRadioTx > 100)) {
 		  
-		  Serial << F("Trans Prev: ") << payload.preview << " Prog: " << payload.program_1 << "\n";  
+		  //Serial << F("Trans Prev: ") << payload.preview << " Prog: " << payload.program_1 << "\n";  
       
       radio.stopListening();
 			radio.write(&payload, sizeof(payload));
 			
 			oldPayload = payload;
-			//ATEMTally.change_LED_state(3);
 
       lastRadioTx = millis();
 		}
 	}
 
 	// a delay is needed due to some weird issue
-	delay(10);
-
-	//ATEMTally.change_LED_state(1);
-
-	// monitors for the reset button press
-	//ATEMTally.monitor_reset();
+	delay(20);
 }
 

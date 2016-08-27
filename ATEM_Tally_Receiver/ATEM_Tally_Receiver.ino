@@ -1,19 +1,26 @@
 #include <RF24.h>
+
 #include "ATEMData.h"
+
 
 // PROGRAM LED pin
 const int PROGRAM_PIN = A0;
+
 // PREVIEW LED pin
 const int PREVIEW_PIN = A2;
-// POWER LED pin
+
+// POWER LED pin (blinks the node # on power up)
 const int POWER_PIN = A1;
 
 // Node # DIP switch 1 pin
 const int DIP1_PIN = 3;
+
 // Node # DIP switch 2 pin
 const int DIP2_PIN = 4;
+
 // Node # DIP switch 3 pin
 const int DIP3_PIN = 5;
+
 // Node # DIP switch 4 pin
 const int DIP4_PIN = 6;
 
@@ -43,21 +50,36 @@ const uint8_t address[] = { 0x10,0x10,0x10 };
 /***********************************/
 
 void setup() {
-	// initialize all the defined pins
-	pinMode(PROGRAM_PIN, OUTPUT);
-	pinMode(PREVIEW_PIN, OUTPUT);
-	pinMode(POWER_PIN, OUTPUT);
-	pinMode(DIP1_PIN, INPUT_PULLUP);
+  // initialize all the defined pins
+  pinMode(PROGRAM_PIN, OUTPUT);
+  pinMode(PREVIEW_PIN, OUTPUT);
+  pinMode(POWER_PIN, OUTPUT);
+  pinMode(DIP1_PIN, INPUT_PULLUP);
   pinMode(DIP2_PIN, INPUT_PULLUP);
   pinMode(DIP3_PIN, INPUT_PULLUP);
   pinMode(DIP4_PIN, INPUT_PULLUP);
 
-	// turn all LEDs off
+  // turn all LEDs off (0 is off, 1023 is on)
   digitalWrite(PROGRAM_PIN, LOW);
   digitalWrite(PREVIEW_PIN, LOW);
-  digitalWrite(POWER_PIN, LOW); 
+  digitalWrite(POWER_PIN, LOW);  
+
+  // Test all the LEDs // GRÜN
+  digitalWrite(POWER_PIN, HIGH);
+  delay(500);
+  digitalWrite(POWER_PIN, LOW);
+
+  digitalWrite(PREVIEW_PIN, HIGH);
+  delay(500);
+  digitalWrite(PREVIEW_PIN, LOW);
+
+  digitalWrite(PROGRAM_PIN, HIGH);
+  delay(500);
+  digitalWrite(PROGRAM_PIN, LOW);
+
+  delay(1000);
   
-	// set the Node # according to the DIP pins
+  // set the Node # according to the DIP pins
   setNodeID();
 
   // initialize the radio
@@ -81,25 +103,25 @@ void setup() {
 
   radio.startListening();
   
-	if (this_node == 200) {
-		// if the Node # is 0 (alias to 200), blink quickly (30 times) on power on
-		for (int i=0; i < 30; i++) {
-			digitalWrite(POWER_PIN, HIGH);
-			delay(20);
-			digitalWrite(POWER_PIN, LOW);
-			delay(20);
-		}
-	} else {
-		// if the Node # is a set number, blink the Node # on power on
-		for (int i=0; i < this_node; i++) {
-			digitalWrite(POWER_PIN, HIGH);
-			delay(300);
-			digitalWrite(POWER_PIN, LOW);
-			delay(300);
-		}
-	}
+  if (this_node == 200) {
+    // if the Node # is 0 (alias to 200), blink quickly (30 times) on power on
+    for (int i=0; i < 30; i++) {
+      analogWrite(POWER_PIN, 1023);   
+      delay(50);
+      analogWrite(POWER_PIN, 0);
+      delay(50);
+    }
+  } else {
+    // if the Node # is a set number, blink the Node # on power on
+    for (int i=0; i < this_node; i++) {
+      analogWrite(POWER_PIN, 1023);
+      delay(300);
+      analogWrite(POWER_PIN, 0);
+      delay(300);
+    }
+  }
   
-	// set this variable to current time
+  // set this variable to current time
   last_radio_recv = millis();
 }
 
@@ -107,6 +129,9 @@ void loop() {
 
   if(radio.available()) {
     radio.read(&payload, sizeof(payload) );
+
+    // keep track of last radio signal time
+    last_radio_recv = millis();
 
     // Receiving of a new packed was done.
     // Check if it contains new data.
@@ -116,9 +141,6 @@ void loop() {
     
     // get the program and preview numbers
     currentPayload = payload;
-
-    // keep track of last radio signal time
-    last_radio_recv = millis();
 
     // turn off all LEDs
     digitalWrite(PREVIEW_PIN, LOW);
@@ -134,16 +156,16 @@ void loop() {
     } else {
       // if the Node # is a set number, trigger an LED accordingly
       if (currentPayload.program_1 == this_node || currentPayload.program_2 == this_node) {
-        digitalWrite(PREVIEW_PIN, LOW);
-        digitalWrite(PROGRAM_PIN, HIGH);
+        digitalWrite(PREVIEW_PIN, 0);
+        analogWrite(PROGRAM_PIN, 1023);
       } else if (currentPayload.preview == this_node) {
-        digitalWrite(PROGRAM_PIN, LOW);
-        digitalWrite(PREVIEW_PIN, HIGH);
+        analogWrite(PROGRAM_PIN, 0);
+        digitalWrite(PREVIEW_PIN, 1023);
       }
     }
   }
   
-	// turn off LEDs when no radio signal exists (the past 5,5 second)
+  // turn off LEDs when no radio signal exists (the past 5,5 second)
   if (millis() - last_radio_recv > 5500) {
     digitalWrite(PREVIEW_PIN, 0);
     digitalWrite(PROGRAM_PIN, 0);
