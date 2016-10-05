@@ -2,27 +2,23 @@
 
 #include "ATEMData.h"
 
-
-// PROGRAM LED pin
-const int PROGRAM_PIN = A0;
-
 // PREVIEW LED pin
 const int PREVIEW_PIN = A2;
 
-// POWER LED pin (blinks the node # on power up)
-const int POWER_PIN = A1;
+// PROGRAMM LED pin (blinks the node # on power up)
+const int PROGRAM_PIN = A1;
 
 // Node # DIP switch 1 pin
-const int DIP1_PIN = 3;
+const int DIP1_PIN = 2;
 
 // Node # DIP switch 2 pin
-const int DIP2_PIN = 4;
+const int DIP2_PIN = 3;
 
 // Node # DIP switch 3 pin
-const int DIP3_PIN = 5;
+const int DIP3_PIN = 4;
 
 // Node # DIP switch 4 pin
-const int DIP4_PIN = 6;
+const int DIP4_PIN = 5;
 
 // last received radio signal time (to power off LEDs when no signal)
 unsigned long last_radio_recv = 0;
@@ -53,7 +49,6 @@ void setup() {
   // initialize all the defined pins
   pinMode(PROGRAM_PIN, OUTPUT);
   pinMode(PREVIEW_PIN, OUTPUT);
-  pinMode(POWER_PIN, OUTPUT);
   pinMode(DIP1_PIN, INPUT_PULLUP);
   pinMode(DIP2_PIN, INPUT_PULLUP);
   pinMode(DIP3_PIN, INPUT_PULLUP);
@@ -62,13 +57,8 @@ void setup() {
   // turn all LEDs off (0 is off, 1023 is on)
   digitalWrite(PROGRAM_PIN, LOW);
   digitalWrite(PREVIEW_PIN, LOW);
-  digitalWrite(POWER_PIN, LOW);  
 
-  // Test all the LEDs // GRÜN
-  digitalWrite(POWER_PIN, HIGH);
-  delay(500);
-  digitalWrite(POWER_PIN, LOW);
-
+  // Test all the LEDs
   digitalWrite(PREVIEW_PIN, HIGH);
   delay(500);
   digitalWrite(PREVIEW_PIN, LOW);
@@ -106,17 +96,17 @@ void setup() {
   if (this_node == 200) {
     // if the Node # is 0 (alias to 200), blink quickly (30 times) on power on
     for (int i=0; i < 30; i++) {
-      analogWrite(POWER_PIN, 1023);   
+      digitalWrite(PROGRAM_PIN, HIGH);   
       delay(50);
-      analogWrite(POWER_PIN, 0);
+      digitalWrite(PROGRAM_PIN, LOW);
       delay(50);
     }
   } else {
     // if the Node # is a set number, blink the Node # on power on
     for (int i=0; i < this_node; i++) {
-      analogWrite(POWER_PIN, 1023);
+      digitalWrite(PROGRAM_PIN, HIGH);
       delay(300);
-      analogWrite(POWER_PIN, 0);
+      digitalWrite(PROGRAM_PIN, LOW);
       delay(300);
     }
   }
@@ -145,13 +135,12 @@ void loop() {
     // turn off all LEDs
     digitalWrite(PREVIEW_PIN, LOW);
     digitalWrite(PROGRAM_PIN, LOW);
-    digitalWrite(POWER_PIN, LOW);
 
     if (this_node == 200) {
       // if the Node # is 200 (which is also 0), blink POWER LED every 1 second if signal exists
-      digitalWrite(POWER_PIN, HIGH);
+      digitalWrite(PROGRAM_PIN, HIGH);
       delay(1000);
-      digitalWrite(POWER_PIN, LOW);
+      digitalWrite(PROGRAM_PIN, LOW);
       delay(1000);
     } else {
       // if the Node # is a set number, trigger an LED accordingly
@@ -167,9 +156,8 @@ void loop() {
   
   // turn off LEDs when no radio signal exists (the past 5,5 second)
   if (millis() - last_radio_recv > 5500) {
-    digitalWrite(PREVIEW_PIN, 0);
-    digitalWrite(PROGRAM_PIN, 0);
-    digitalWrite(POWER_PIN, 0);
+    digitalWrite(PREVIEW_PIN, LOW);
+    digitalWrite(PROGRAM_PIN, LOW);
   }
 }
 
